@@ -1,0 +1,180 @@
+<script setup lang="ts">
+definePageMeta({ middleware: 'auth' })
+
+interface Task {
+  id: number
+  title: string
+  description: string | null
+  completed: boolean
+  createdAt: string
+}
+
+const tasks = ref<Task[]>([])
+const newTitle = ref('')
+const newDescription = ref('')
+const loading = ref(true)
+const error = ref('')
+const validationError = ref('')
+
+function validateTask(title: string, description: string): string | null {
+  if (!title.trim()) return 'Title is required'
+  if (title.length > 200) return 'Title must be 200 characters or less'
+  if (description.length > 1000) return 'Description must be 1000 characters or less'
+  return null
+}
+
+async function fetchTasks() {
+  try {
+    const data = await $fetch('/api/tasks')
+    tasks.value = data.tasks
+  } catch {
+    error.value = 'Failed to load tasks'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function addTask() {
+  validationError.value = ''
+  const err = validateTask(newTitle.value, newDescription.value)
+  if (err) {
+    validationError.value = err
+    return
+  }
+  try {
+    const data = await $fetch('/api/tasks', {
+      method: 'POST',
+      body: { title: newTitle.value, description: newDescription.value || undefined },
+    })
+    tasks.value.unshift(data.task)
+    newTitle.value = ''
+    newDescription.value = ''
+  } catch {
+    error.value = 'Failed to create task'
+  }
+}
+
+async function toggleTask(task: Task) {
+  try {
+    const data = await $fetch(`/api/tasks/${task.id}`, {
+      method: 'PUT',
+      body: { completed: !task.completed },
+    })
+    const idx = tasks.value.findIndex((t) => t.id === task.id)
+    if (idx !== -1) tasks.value[idx] = data.task
+  } catch {
+    error.value = 'Failed to update task'
+  }
+}
+
+async function deleteTask(id: number) {
+  if (!confirm('Delete this task? This cannot be undone.')) return
+  try {
+    await $fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+    tasks.value = tasks.value.filter((t) => t.id !== id)
+  } catch {
+    error.value = 'Failed to delete task'
+  }
+}
+
+onMounted(fetchTasks)
+</script>
+
+<template>
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Tasks</h1>
+
+    <form class="mt-6 space-y-3" @submit.prevent="addTask">
+      <div>
+        <label for="new-task-title" class="block text-sm font-medium text-gray-700">Task title</label>
+        <input
+          id="new-task-title"
+          v-model="newTitle"
+          type="text"
+          required
+          maxlength="200"
+          class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none"
+          placeholder="Task title"
+        >
+      </div>
+      <div>
+        <label for="new-task-description" class="block text-sm font-medium text-gray-700">Description (optional)</label>
+        <textarea
+          id="new-task-description"
+          v-model="newDescription"
+          maxlength="1000"
+          rows="3"
+          class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none resize-y"
+          placeholder="Description (optional)"
+        />
+        <p class="mt-1 text-xs text-gray-400 text-right">{{ 1000 - (newDescription?.length ?? 0) }} characters remaining</p>
+      </div>
+      <div
+        v-if="validationError"
+        role="alert"
+        aria-live="polite"
+        class="rounded-md bg-red-50 p-3 text-sm text-red-700"
+      >
+        {{ validationError }}
+      </div>
+      <button
+        type="submit"
+        class="rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-700"
+      >
+        Add Task
+      </button>
+    </form>
+
+    <div
+      v-if="error"
+      role="alert"
+      aria-live="polite"
+      class="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
+    >
+      {{ error }}
+    </div>
+
+    <div v-if="loading" class="mt-8 text-center text-gray-500">Loading...</div>
+
+    <div v-else-if="tasks.length === 0" class="mt-8 text-center text-gray-500">
+      No tasks yet. Create your first one above.
+    </div>
+
+    <div v-else aria-live="polite" aria-label="Task list">
+      <ul class="mt-6 space-y-2">
+        <li
+          v-for="task in tasks"
+          :key="task.id"
+          class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4"
+        >
+          <input
+            type="checkbox"
+            :checked="task.completed"
+            :aria-label="`Mark '${task.title}' as complete`"
+            class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            @change="toggleTask(task)"
+          >
+          <div class="flex-1 min-w-0">
+            <p
+              class="text-sm font-medium"
+              :class="task.completed ? 'text-gray-400 line-through' : 'text-gray-900'"
+            >
+              {{ task.title }}
+            </p>
+            <p v-if="task.description" class="mt-0.5 text-xs text-gray-500 truncate">
+              {{ task.description }}
+            </p>
+          </div>
+          <button
+            type="button"
+            :aria-label="`Delete task '${task.title}'`"
+            class="text-sm text-gray-400 hover:text-red-600"
+            @click="deleteTask(task.id)"
+          >
+            Delete
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
