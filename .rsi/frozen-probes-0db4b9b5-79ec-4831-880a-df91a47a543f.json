@@ -1,0 +1,1 @@
+[{"id":"server-output","name":"Build output exists","path":".output/server/index.mjs","type":"file_exists","enabled":true,"runWhen":"post","timeoutMs":5000,"failureMode":"block"},{"id":"nuxt-typecheck","name":"Nuxt type check","type":"command","command":"npx nuxi typecheck","enabled":true,"runWhen":"post","timeoutMs":120000,"failureMode":"warn"}]
