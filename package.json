@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npx prisma generate && nuxt build",
+    "build": "npx prisma generate && npm run db:setup && nuxt build",
     "dev": "npx prisma generate && nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
@@ -16,7 +16,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "test": "vitest"
+    "test": "vitest",
+    "db:setup": "node scripts/db-setup.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",

@@ -1,5 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 
+// Provide a default DATABASE_URL for environments where it's not configured
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = 'file:./prisma/prod.db'
+}
+
 let prisma: PrismaClient
 
 declare global {
