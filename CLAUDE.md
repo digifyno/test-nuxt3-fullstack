@@ -1,3 +1,4 @@
+<!-- RSI-META: worker=a7d8f844-a762-4823-84d1-b57877a2f263 product=33541a09-9690-4a7a-abf2-21e21ad3743b scope-hash=3c9d612b2c0d8a2d generated=2026-03-25T01:48:42.839Z -->
 # Nuxt 3 Fullstack Starter
 
 ## Project Structure
