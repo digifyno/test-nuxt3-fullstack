@@ -1,8 +1,23 @@
 #!/usr/bin/env node
 // Database initialization script
-// Sets a default DATABASE_URL if not configured, then runs Prisma migrations and seeding
+// Loads .env file, sets a default DATABASE_URL if not configured, then runs Prisma migrations and seeding
 import { execSync } from 'child_process'
 import { resolve } from 'path'
+import { existsSync, readFileSync } from 'fs'
+
+// Load .env file so build-time migrations target the same database as runtime
+const envPath = resolve(process.cwd(), '.env')
+if (existsSync(envPath)) {
+  for (const line of readFileSync(envPath, 'utf-8').split('\n')) {
+    const match = line.match(/^\s*([^#=\s][^=]*?)\s*=\s*(.*?)\s*$/)
+    if (match) {
+      const [, key, val] = match
+      if (!process.env[key]) {
+        process.env[key] = val.replace(/^["']|["']$/g, '')
+      }
+    }
+  }
+}
 
 if (!process.env.DATABASE_URL) {
   // Use an absolute path so both prisma migrate deploy and the production Prisma client
