@@ -12,5 +12,6 @@ export default defineEventHandler(async () => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     database: dbStatus,
+    uptime: process.uptime(),
   }
 })
