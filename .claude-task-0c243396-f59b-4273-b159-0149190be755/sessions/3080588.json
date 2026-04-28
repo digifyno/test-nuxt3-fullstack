@@ -1,0 +1,1 @@
+{"pid":3080588,"sessionId":"04bf2d50-e132-45aa-8276-1ea10fa0094c","cwd":"/home/rsi/rsi-worktrees/25fe446a","startedAt":1777354962753,"procStart":"97838066","version":"2.1.119","peerProtocol":1,"kind":"interactive","entrypoint":"sdk-cli","name":"code:Cap vitest fork workers to reduce build-burst CPU","updatedAt":1777354962809}

@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.15.2",
-    "@nuxt/test-utils": "^4.0.0",
+    "@nuxt/test-utils": "^4.0.3",
     "@tailwindcss/vite": "^4.0.14",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.9",
